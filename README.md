@@ -1,14 +1,13 @@
+### powershellで実行するコマンド
+
 ```php
-
-powershellで実行するコマンド
-
-// -tをつけるとタグ名
+// -tをつけるとタグ名付与できる
 docker build .
 docker build . -t test_almalinux
 
-// docker run -v //c/Users/chopp/Docker_Project/test/src/:/var/www/ -itd -p 80:80 --privileged --name test_almalinux_dockerfile test_almalinux /bin/bash
-// /sbin/initを与えないといけないらしい↓
-docker run -v //c/Users/chopp/Docker_Project/test/src/:/var/www/ -itd -p 80:80 --privileged --name test_almalinux_dockerfile test_almalinux /sbin/init
+// /sbin/initを与えないとsystemed系のコマンドが使えない↓
+// docker run -v //c/Users/chopp/Docker_Project/test/src/:/var/www/ -itd -p 80:80 --privileged --name test_almalinux_dockerfile test_almalinux /sbin/init
+docker run -v //c/Users/chopp/Docker_Project/test/:/var/www/ -itd -p 80:80 --privileged --name test_almalinux_dockerfile test_almalinux /sbin/init
 
 // Dcoker立ち上げ実行コマンド
 docker exec -it test_almalinux_dockerfile /bin/bash
@@ -22,21 +21,27 @@ ln -sf  /usr/share/zoneinfo/Asia/Tokyo /etc/localtime
 
 systemctl restart php-fpm
 systemctl restart nginx
-
+// 自動起動設定
 systemctl is-enabled nginx
 systemctl enable nginx
-
+// composerインストール
 wget https://getcomposer.org/installer -O composer-installer.php
 php composer-installer.php --filename=composer --install-dir=/usr/local/bin
 composer self-update
+cd /var/www/src/sns_project/
 composer install
 composer --version
 
-chown -R nginx:nginx /var/www/sns_project/
-chown -R nginx:nginx /var/www/sns_project/storage/
-chown -R nginx:nginx /var/www/sns_project/bootstrap/cache/
-chmod -R 0777 /var/www/sns_project/storage/
-chmod -R 0775 /var/www/sns_project/bootstrap/cache/
+chown -R nginx:nginx /var/www/src/sns_project/
+chown -R nginx:nginx /var/www/src/sns_project/storage/
+chown -R nginx:nginx /var/www/src/sns_project/bootstrap/cache/
+chmod -R 0777 /var/www/src/sns_project/storage/
+chmod -R 0775 /var/www/src/sns_project/bootstrap/cache/
 
+
+
+
+// php mv composer.phar /usr/local/bin/composer
+chmod +x /usr/local/bin/composer
 
 ```
