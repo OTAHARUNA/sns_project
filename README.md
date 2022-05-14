@@ -38,10 +38,6 @@ chown -R nginx:nginx /var/www/src/sns_project/bootstrap/cache/
 chmod -R 0777 /var/www/src/sns_project/storage/
 chmod -R 0775 /var/www/src/sns_project/bootstrap/cache/
 
-
-// php mv composer.phar /usr/local/bin/composer
-chmod +x /usr/local/bin/composer
-
 ```
 
 ### 注意事項
@@ -51,20 +47,19 @@ envファイルの作成はもとになるファイルはすでにあるので�
 ```php
 cp .env.example .env
 ```
-ポスグレつなげる設定の為、ファイル修正も行う
+ポスグレつなげる設定の為、合わせてここで修正
 * envファイル
 
-* \config\database.phpファイル
-* 
+* \config\database.phpファイル プッシュした為解決のはず。
 
 
-キー発行と念のためキャッシュクリアも実行
+キー発行と念のためキャッシュクリア（envファイル修正するときは使用）も実行
 ```php
 php artisan key:generate
 php artisan config:clear
 ```
 
-上記作業を行ったらLaravelの画面は開ける
+**上記作業を行ったらLaravelの画面は開ける**
 
 
 // ポスグレ設定
@@ -76,27 +71,25 @@ su - postgres
 //PWはご自身の設定されたいものをご入力ください。
 psql -c "alter user postgres with password 'password'"
 
+//ポスグレログ出力先作成
+mkdir /var/log/postgresql
+chown postgres:postgres /var/log/postgresql
+chmod 750 /var/log/postgresql
 
-//外部接続設定
-
-
+//外部接続設定:下記ファイルを修正
 vi /var/lib/pgsql/data/postgresql.conf
 vi /var/lib/pgsql/data/pg_hba.conf
 
 //ポスグレに接続:今後も使用
 su - postgres
+createuser --pwprompt --interactive pgadmin
 
-
+//ポスグレ再起動
 systemctl restart postgresql
 
 su - postgres
 psql
+DB確認できる \l
 
-下記コマンド実行してエラーが発生しなかったら接続成功
+下記コマンド実行してエラーが発生しせずテーブル作成されていたら接続成功
 php artisan migrate
-
-
-ポスグレログ出力先作成
-mkdir /var/log/postgresql
-chown postgres:postgres /var/log/postgresql
-chmod 750 /var/log/postgresql
