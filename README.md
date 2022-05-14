@@ -2,17 +2,17 @@
 
 ```php
 // -tをつけるとタグ名付与できる
-docker build .
 docker build . -t test_almalinux
 
 // /sbin/initを与えないとsystemed系のコマンドが使えない↓
 // docker run -v //c/Users/chopp/Docker_Project/test/src/:/var/www/ -itd -p 80:80 --privileged --name test_almalinux_dockerfile test_almalinux /sbin/init
 docker run -v //c/Users/chopp/Docker_Project/test/:/var/www/ -itd -p 80:80 --privileged --name test_almalinux_dockerfile test_almalinux /sbin/init
 
-// Dcoker立ち上げ実行コマンド
+// Dcoker立ち上げ実行コマンド:今後もずっと接続する時は使用
 docker exec -it test_almalinux_dockerfile /bin/bash
 
-//接続したら
+
+//接続したら、タイムゾーンの設定
 cp /etc/localtime /etc/localtime.org
 ln -sf  /usr/share/zoneinfo/Asia/Tokyo /etc/localtime
 // dnf update
@@ -39,9 +39,21 @@ chmod -R 0777 /var/www/src/sns_project/storage/
 chmod -R 0775 /var/www/src/sns_project/bootstrap/cache/
 
 
-
-
 // php mv composer.phar /usr/local/bin/composer
 chmod +x /usr/local/bin/composer
 
+```
+
+### 注意事項
+laravelをクローンしだけでは、ファイルが足りません。
+vendorフォルダは上記のcomposer installで取得できましたが、envファイルがない状態です。
+envファイルの作成はもとになるファイルはすでにあるのでコピーする
+```php
+cp .env.example .env
+```
+
+キー発行と念のためキャッシュクリアも実行
+```php
+php artisan key:generate
+php artisan config:clear
 ```
