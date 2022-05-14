@@ -8,9 +8,9 @@ docker build . -t test_almalinux
 // docker run -v //c/Users/chopp/Docker_Project/test/src/:/var/www/ -itd -p 80:80 --privileged --name test_almalinux_dockerfile test_almalinux /sbin/init
 docker run -v //c/Users/chopp/Docker_Project/test/:/var/www/ -itd -p 80:80 --privileged --name test_almalinux_dockerfile test_almalinux /sbin/init
 
-// Dcoker立ち上げ実行コマンド:今後もずっと接続する時は使用
-docker exec -it test_almalinux_dockerfile /bin/bash
-
+// Dcoker立ち上げ実行コマンド:今後もずっと接続する時は使用/後者にしたらディレクトリに移動できる
+// docker exec -it test_almalinux_dockerfile /bin/bash
+docker exec -it -w /var/www/src/sns_project test_almalinux_dockerfile /bin/bash
 
 //接続したら、タイムゾーンの設定
 cp /etc/localtime /etc/localtime.org
@@ -51,9 +51,52 @@ envファイルの作成はもとになるファイルはすでにあるので�
 ```php
 cp .env.example .env
 ```
+ポスグレつなげる設定の為、ファイル修正も行う
+* envファイル
+
+* \config\database.phpファイル
+* 
+
 
 キー発行と念のためキャッシュクリアも実行
 ```php
 php artisan key:generate
 php artisan config:clear
 ```
+
+上記作業を行ったらLaravelの画面は開ける
+
+
+// ポスグレ設定
+/usr/bin/postgresql-setup initdb
+systemctl enable --now postgresql
+systemctl status postgresql
+// 管理者ユーザーのパスワード更新
+su - postgres
+//PWはご自身の設定されたいものをご入力ください。
+psql -c "alter user postgres with password 'password'"
+
+
+//外部接続設定
+
+
+vi /var/lib/pgsql/data/postgresql.conf
+vi /var/lib/pgsql/data/pg_hba.conf
+
+//ポスグレに接続:今後も使用
+su - postgres
+
+
+systemctl restart postgresql
+
+su - postgres
+psql
+
+下記コマンド実行してエラーが発生しなかったら接続成功
+php artisan migrate
+
+
+ポスグレログ出力先作成
+mkdir /var/log/postgresql
+chown postgres:postgres /var/log/postgresql
+chmod 750 /var/log/postgresql
