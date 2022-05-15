@@ -1,4 +1,6 @@
 ## システムを使っている上でよく実行するコマンド
+* コンテナを立ち上げる
+docker start test_almalinux_dockerfile
 * リモート接続する為に使用
 docker exec -it -w /var/www/src/sns_project test_almalinux_dockerfile /bin/bash
 
