@@ -1,64 +1,95 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
+### powershellで実行するコマンド
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+```php
+// -tをつけるとタグ名付与できる
+docker build . -t test_almalinux
 
-## About Laravel
+// /sbin/initを与えないとsystemed系のコマンドが使えない↓
+docker run -v //c/Users/chopp/Docker_Project/test/src/:/var/www/ -itd -p 80:80 --privileged --name test_almalinux_dockerfile test_almalinux /sbin/init
+// docker run -v //c/Users/chopp/Docker_Project/test/:/var/www/ -itd -p 80:80 --privileged --name test_almalinux_dockerfile test_almalinux /sbin/init
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+// Dcoker立ち上げ実行コマンド:今後もずっと接続する時は使用/後者にしたらディレクトリに移動できる
+// docker exec -it test_almalinux_dockerfile /bin/bash
+docker exec -it -w /var/www/sns_project test_almalinux_dockerfile /bin/bash
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+//接続したら、タイムゾーンの設定
+cp /etc/localtime /etc/localtime.org
+ln -sf  /usr/share/zoneinfo/Asia/Tokyo /etc/localtime
+// dnf update
+// dnf install epel-release kernel-devel kernel-headers gcc perl make dkms binutils patch libgomp glibc-headers glibc-devel elfutils-libelf-deve
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
-## Learning Laravel
+systemctl restart php-fpm
+systemctl restart nginx
+// 自動起動設定
+systemctl is-enable/www/d nginx
+systemctl enable nginx
+// composerインストール
+wget https://getcomposer.org/installer -O composer-installer.php
+php composer-installer.php --filename=composer --install-dir=/usr/local/bin
+cd /var/www/sns_project/
+composer install
+composer --version
+// composer self-update
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+chown -R nginx:nginx /var/www/sns_project/
+chown -R nginx:nginx /var/www/sns_project/storage/
+chown -R nginx:nginx /var/www/sns_project/bootstrap/cache/
+chmod -R 0777 /var/www/sns_project/storage/
+chmod -R 0775 /var/www/sns_project/bootstrap/cache/
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+```
 
-## Laravel Sponsors
+### 注意事項
+laravelをクローンしだけでは、ファイルが足りません。
+vendorフォルダは上記のcomposer installで取得できましたが、envファイルがない状態です。
+envファイルの作成はもとになるファイルはすでにあるのでコピーする
+```php
+cp .env.example .env
+```
+ポスグレつなげる設定の為、合わせてここで修正
+* envファイル
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+* \config\database.phpファイル プッシュした為解決のはず。
 
-### Premium Partners
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+キー発行と念のためキャッシュクリア（envファイル修正するときは使用）も実行
+```php
+php artisan key:generate
+php artisan config:clear
+```
 
-## Contributing
+**上記作業を行ったらLaravelの画面は開ける**
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
 
-## Code of Conduct
+// ポスグレ設定
+/usr/bin/postgresql-setup initdb
+systemctl enable --now postgresql
+systemctl status postgresql
+// 管理者ユーザーのパスワード更新
+su - postgres
+//PWはご自身の設定されたいものをご入力ください。
+psql -c "alter user postgres with password 'password'"
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+//ポスグレログ出力先作成
+mkdir /var/log/postgresql
+chown postgres:postgres /var/log/postgresql
+chmod 750 /var/log/postgresql
 
-## Security Vulnerabilities
+//外部接続設定:下記ファイルを修正
+vi /var/lib/pgsql/data/postgresql.conf
+vi /var/lib/pgsql/data/pg_hba.conf
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+//ポスグレに接続:今後も使用
+su - postgres
+createuser --pwprompt --interactive pgadmin
 
-## License
+//ポスグレ再起動
+systemctl restart postgresql
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+su - postgres
+psql
+DB確認できる \l
+
+下記コマンド実行してエラーが発生しせずテーブル作成されていたら接続成功
+php artisan migrate
