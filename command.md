@@ -18,5 +18,11 @@ grep -H "" /etc/*version ; grep -H "" /etc/*release）
 
 * nginx -v nginx
 * php -v php
-* php artisan -v laravel
+* php artisan -v //laravel
 * psql --version
+
+## 設定ファイル
+* php.iniファイルがどこにあるか
+
+## xdebug
+* 有効化できているか確認
