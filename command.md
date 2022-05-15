@@ -1,6 +1,7 @@
 ## システムを使っている上でよく実行するコマンド
 * コンテナを立ち上げる
 docker start test_almalinux_dockerfile
+
 * リモート接続する為に使用
 docker exec -it -w /var/www/src/sns_project test_almalinux_dockerfile /bin/bash
 
@@ -23,8 +24,13 @@ grep -H "" /etc/*version ; grep -H "" /etc/*release）
 * php artisan -v //laravel
 * psql --version
 
-## 設定ファイル
-* php.iniファイルがどこにあるか
+## インストール可能なバージョン確認コマンド
+dnf module list postgresql
 
-## xdebug
-* 有効化できているか確認
+##
+* php.iniがどこにあるか探すコマンド
+php -r "echo phpinfo();" | grep "php.ini"
+
+
+## xdebug有効になっているかの確認
+php -i | grep xdebug
