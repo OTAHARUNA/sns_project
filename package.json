@@ -19,6 +19,7 @@
     "dependencies": {
         "exif-js": "^2.3.0",
         "v3-infinite-loading": "^1.0.6",
-        "vue": "^3.2.33"
+        "vue": "^3.2.33",
+        "vue-ctk-date-time-picker": "^3.0.0-alpha.0"
     }
 }
